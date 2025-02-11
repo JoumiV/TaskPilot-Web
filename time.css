@@ -1,0 +1,66 @@
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background-image: url('wallpaper.jpg');
+    background-size: cover;
+}
+
+.container {
+    text-align: center;
+    background: transparent;
+    border: 1px solid white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    color: white;
+}
+
+h1 {
+    margin-bottom: 20px;
+}
+
+.mode-buttons button {
+    padding: 10px 20px;
+    margin: 5px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.mode-buttons button.active {
+    background-color: #d49fff;
+    color: rgb(0, 0, 0);
+}
+
+.timer {
+    font-size: 48px;
+    margin: 20px 0;
+}
+
+.controls button {
+    padding: 10px 20px;
+    margin: 5px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    background-color: #5334a7;
+    color: white;
+    transition: 0.5s;
+    border: 1px solid white;
+}
+
+.controls button:disabled {
+    background-color: #35297e;
+    cursor: not-allowed;
+}
+
+.controls button:hover {
+    background-color: #d49fff;
+    color: rgb(0, 0, 0);
+}

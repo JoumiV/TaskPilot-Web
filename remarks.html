@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Progress Tracker</title>
+    <style>
+        /* Progress Bar Styles */
+        #progressBarContainer {
+            width: 100%;
+            height: 20px;
+            background-color: #f3f3f3;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        #progressBar {
+            height: 100%;
+            background-color: #4caf50;
+            width: 0;
+            transition: width 0.5s ease;
+        }
+
+        /* Remarks and Motivation Styles */
+        #remarks {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        #motivation {
+            font-style: italic;
+            color: #555;
+            margin-top: 10px;
+        }
+
+        /* Canvas (Bar Graph) Styles */
+        #stats {
+            margin-top: 20px;
+        }
+
+        #barGraph {
+            width: 100%;
+            max-width: 400px;
+            margin: 20px auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Progress Tracker</h1>
+
+    <!-- Progress Bar -->
+    <div id="progressTracker">
+        <h2>Your Progress</h2>
+        <div id="progressBarContainer">
+            <div id="progressBar"></div>
+        </div>
+        <p id="remarks"></p>
+        <p id="motivation"></p>
+    </div>
+
+    <!-- Stats Section -->
+    <div id="stats">
+        <h2>Your Stats</h2>
+        <canvas id="barGraph"></canvas>
+    </div>
+
+    <script>
+        // Function to calculate progress
+        function calculateProgress() {
+            const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+            const totalTasks = tasks.length;
+            const completedTasks = tasks.filter(task => task.completed).length;
+            const progress = totalTasks === 0 ? 0 : (completedTasks / totalTasks) * 100;
+
+            // Update progress bar
+            const progressBar = document.getElementById('progressBar');
+            progressBar.style.width = `${progress}%`;
+
+            // Update remarks
+            const remarks = document.getElementById('remarks');
+            if (progress >= 80) {
+                remarks.textContent = "Magaling! Keep it up!";
+            } else if (progress >= 50) {
+                remarks.textContent = "Good job! Kaya pa yan!";
+            } else {
+                remarks.textContent = "Kailangan pa ng improvement!";
+            }
+
+            // Update motivation
+            const motivation = document.getElementById('motivation');
+            const motivationalMessages = [
+                "Every task you complete brings you closer to your goals!",
+                "Small steps lead to big achievements!",
+                "You're capable of more than you think!",
+                "Stay consistent, and you'll see results!",
+            ];
+            motivation.textContent = motivationalMessages[Math.floor(Math.random() * motivationalMessages.length)];
+
+            // Calculate on-time tasks
+            const now = new Date();
+            const onTimeTasks = tasks.filter(task => {
+                const deadline = new Date(task.deadline);
+                return task.completed && now <= deadline; // Task completed before or on deadline
+            }).length;
+
+            // Draw bar graph
+            drawBarGraph(completedTasks, onTimeTasks, totalTasks);
+        }
+
+        // Function to draw bar graph
+        function drawBarGraph(completedTasks, onTimeTasks, totalTasks) {
+            const canvas = document.getElementById('barGraph');
+            const ctx = canvas.getContext('2d');
+
+            // Set canvas dimensions
+            canvas.width = 400;
+            canvas.height = 200;
+
+            // Data for the bar graph
+            const data = {
+                labels: ['Completed Tasks', 'On-Time Tasks'],
+                values: [completedTasks, onTimeTasks],
+                colors: ['#4caf50', '#2196f3'], // Green for completed, Blue for on-time
+            };
+
+            // Bar graph settings
+            const barWidth = 50;
+            const barSpacing = 70;
+            const startX = 50;
+            const startY = canvas.height - 30;
+            const maxValue = Math.max(...data.values, totalTasks);
+
+            // Draw bars
+            data.values.forEach((value, index) => {
+                const barHeight = (value / maxValue) * (canvas.height - 50);
+                const x = startX + (barSpacing * index);
+                const y = startY - barHeight;
+
+                // Draw bar
+                ctx.fillStyle = data.colors[index];
+                ctx.fillRect(x, y, barWidth, barHeight);
+
+                // Draw label
+                ctx.fillStyle = '#000';
+                ctx.font = '12px Arial';
+                ctx.fillText(data.labels[index], x, startY + 20);
+
+                // Draw value
+                ctx.fillText(`${value}`, x + 10, y - 5);
+            });
+        }
+
+        // Load progress when the page loads
+        document.addEventListener('DOMContentLoaded', calculateProgress);
+    </script>
+</body>
+</html>

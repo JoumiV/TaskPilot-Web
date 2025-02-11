@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Task Generator</title>
+        <link rel="stylesheet" href="task.css">
+    </head>
+    <body>
+        <div>
+            <h1>Task Generator</h1>
+            <label for="taskName">Task Name:</label>
+            <input type="text" id="taskName" placeholder="Enter task name">
+
+            <label for="taskDeadline">Deadline:</label>
+            <input type="datetime-local" id="taskDeadline">
+
+            <label for="taskWorkload">Workload (Difficulty):</label>
+            <select id="taskWorkload">
+                <option value="1">Low</option>
+                <option value="2">Medium</option>
+                <option value="3">High</option>
+            </select>
+
+            <label for="taskType">Task Type:</label>
+            <select id="taskType">
+                <option value="essay">Essay</option>
+                <option value="math">Mathematical Problem-Solution</option>
+                <option value="science">Science-Related Topic</option>
+            </select>
+
+            <button class="marker1" onclick="addTask()">Add Task</button>
+
+            <ul id="taskList"></ul>
+
+            <a href="remarks.html">Go to Progress Tracker</a>
+        </div>
+        <script>
+            // Load tasks when the page loads
+            document.addEventListener('DOMContentLoaded', loadTasks);
+
+            // Function to add a task
+            function addTask() {
+                const taskName = document.getElementById('taskName').value;
+                const taskDeadline = document.getElementById('taskDeadline').value;
+                const taskWorkload = document.getElementById('taskWorkload').value;
+                const taskType = document.getElementById('taskType').value;
+
+                if (!taskName || !taskDeadline || !taskWorkload || !taskType) {
+                    alert('Please fill in all fields!');
+                    return;
+                }
+
+                const task = {
+                    id: Date.now(), // Unique ID
+                    name: taskName,
+                    deadline: taskDeadline,
+                    workload: taskWorkload,
+                    type: taskType,
+                    completed: false, // Default to incomplete
+                };
+
+                saveTaskToLocalStorage(task);
+                loadTasks(); // Reload tasks to update the UI
+                clearInputs();
+            }
+
+            // Function to save task to localStorage
+            function saveTaskToLocalStorage(task) {
+                let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+                tasks.push(task);
+                localStorage.setItem('tasks', JSON.stringify(tasks));
+            }
+
+            // Function to load tasks from localStorage
+            function loadTasks() {
+                let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+                tasks = prioritizeTasks(tasks); // Prioritize tasks
+                renderTasks(tasks); // Render tasks in the UI
+            }
+
+            // Function to prioritize tasks
+            function prioritizeTasks(tasks) {
+                return tasks.sort((a, b) => {
+                    const urgencyA = new Date(a.deadline).getTime();
+                    const urgencyB = new Date(b.deadline).getTime();
+                    return urgencyA - urgencyB;
+                });
+            }
+
+            // Function to render tasks in the UI
+            function renderTasks(tasks) {
+                const taskList = document.getElementById('taskList');
+                taskList.innerHTML = ''; // Clear the list before rendering
+
+                tasks.forEach(task => {
+                    const taskItem = document.createElement('li');
+                    taskItem.className = 'task-item';
+                    taskItem.dataset.taskId = task.id;
+
+                    taskItem.innerHTML = `
+                        <span><strong>${task.name}</strong></span>
+                        <span>Type: ${task.type}</span>
+                        <span>Deadline: ${new Date(task.deadline).toLocaleString()}</span>
+                        <span>Difficulty: ${getWorkloadText(task.workload)}</span>
+                        <button class="marker" onclick="markTaskAsDone(${task.id})">Mark as Done</button>
+                    `;
+
+                    taskList.appendChild(taskItem);
+                });
+            }
+
+            // Function to mark a task as done
+            function markTaskAsDone(taskId) {
+                let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+                tasks = tasks.map(task => {
+                    if (task.id === taskId) {
+                        task.completed = true; // Mark task as completed
+                    }
+                    return task;
+                });
+                localStorage.setItem('tasks', JSON.stringify(tasks));
+                loadTasks(); // Reload tasks to update the UI
+            }
+
+            // Function to clear input fields
+            function clearInputs() {
+                document.getElementById('taskName').value = '';
+                document.getElementById('taskDeadline').value = '';
+                document.getElementById('taskWorkload').value = '1';
+                document.getElementById('taskType').value = 'essay';
+            }
+
+            // Function to get workload text
+            function getWorkloadText(workloadValue) {
+                switch (workloadValue) {
+                    case '1':
+                        return 'Low';
+                    case '2':
+                        return 'Medium';
+                    case '3':
+                        return 'High';
+                    default:
+                        return 'Unknown';
+                }
+            }
+        </script>
+    </body>
+    </html>

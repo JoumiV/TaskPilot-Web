@@ -1,0 +1,60 @@
+body{
+    background-image: url('wallpaper.jpg');
+    background-size: cover;
+    justify-content: center;
+    align-items: center;
+    font-family: Arial, Helvetica, sans-serif;
+    display: flex;
+}
+div{
+    color:  white;
+    background: transparent;
+    border: 1.5px solid rgb(255, 255, 255);
+    border-radius: 10px;
+    padding: 40px;
+}
+input{
+    padding: 20px;
+    border-radius: 20px;
+    background: transparent;
+    border: 2px solid white;
+    color: white;
+}
+.marker1{
+    padding: 10px;
+    border-radius: 10px;
+    background-color: aquamarine;
+    color: black;
+    transition: 0.5s;
+    border: transparent;
+}
+.marker1:hover{
+    border-radius: 5px;
+    background-color: rgb(70, 124, 106);
+    color: white;
+    border: transparent;
+    transform: scale(1.1);
+}
+
+#taskWorkload{
+    padding: 5px;
+    color: aquamarine;
+    color: black;
+}
+.marker{
+    padding: 10px;
+    border-radius: 10px;
+    background-color: aquamarine;
+    color: black;
+    transition: 0.5s;
+    
+}
+.marker:hover{
+    background-color: rgb(15, 107, 76);
+    color: white;
+    transform: scale(1.1);
+}
+.marker:active{
+    background-color: rgb(199, 255, 86);
+    color: black;
+}
