@@ -14,13 +14,13 @@ function addTask() {
 
     // Create a task object
     const task = {
-        id: Date.now(), // Unique ID based on timestamp
+        id: Date.now(),
         name: taskName,
         deadline: taskDeadline,
         workload: taskWorkload,
         type: taskType,
+        completed: false, // Default to incomplete
     };
-
     // Save the task to localStorage
     saveTaskToLocalStorage(task);
 
@@ -72,12 +72,15 @@ function renderTasks(tasks) {
         taskItem.dataset.taskId = task.id;
 
         taskItem.innerHTML = `
-            <span><strong>${task.name}</strong></span>
-            <span>Type: ${task.type}</span>
-            <span>Deadline: ${new Date(task.deadline).toLocaleString()}</span>
-            <span>Difficulty: ${getWorkloadText(task.workload)}</span>
-            <button onclick="removeTask(this)">Delete</button>
-        `;
+        <span><strong>${task.name}</strong></span>
+        <span>Type: ${task.type}</span>
+        <span>Deadline: ${new Date(task.deadline).toLocaleString()}</span>
+        <span>Difficulty: ${getWorkloadText(task.workload)}</span>
+        <button class="marker" onclick="toggleTaskCompletion(${task.id})">
+            ${task.completed ? 'Undo' : 'Mark as Done'}
+        </button>
+        <button onclick="removeTask(this)">Delete</button>
+    `;
 
         taskList.appendChild(taskItem);
     });

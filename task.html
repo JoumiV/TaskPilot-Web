@@ -1,43 +1,53 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Task Generator</title>
-        <link rel="stylesheet" href="task.css">
-    </head>
-    <body>
-        <div>
-            <h1>Task Generator</h1>
-            <label for="taskName">Task Name:</label>
-            <input type="text" id="taskName" placeholder="Enter task name">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Generator</title>
+    <link rel="stylesheet" href="task.css">
+</head>
+<body>
+    <div>
+        <h1>Task Generator</h1>
+        <label for="taskName">Task Name:</label>
+        <input type="text" id="taskName" placeholder="Enter task name">
 
-            <label for="taskDeadline">Deadline:</label>
-            <input type="datetime-local" id="taskDeadline">
+        <label for="taskDeadline">Deadline:</label>
+        <input type="datetime-local" id="taskDeadline">
 
-            <label for="taskWorkload">Workload (Difficulty):</label>
-            <select id="taskWorkload">
-                <option value="1">Low</option>
-                <option value="2">Medium</option>
-                <option value="3">High</option>
-            </select>
+        <label for="taskWorkload">Workload (Difficulty):</label>
+        <select id="taskWorkload">
+            <option value="1">Low</option>
+            <option value="2">Medium</option>
+            <option value="3">High</option>
+        </select>
 
-            <label for="taskType">Task Type:</label>
-            <select id="taskType">
-                <option value="essay">Essay</option>
-                <option value="math">Mathematical Problem-Solution</option>
-                <option value="science">Science-Related Topic</option>
-            </select>
+        <label for="taskType">Task Type:</label>
+        <select id="taskType">
+            <option value="essay">Essay</option>
+            <option value="math">Mathematical Problem-Solution</option>
+            <option value="science">Science-Related Topic</option>
+        </select>
 
-            <button class="marker1" onclick="addTask()">Add Task</button>
+        <button class="marker1" onclick="addTask()">Add Task</button>
 
-            <ul id="taskList"></ul>
-
-            <a href="remarks.html">Go to Progress Tracker</a>
+        <!-- Progress Tracker -->
+        <div id="progress">
+            <progress id="progressBar" value="0" max="100"></progress>
+            <span id="progressText">0% Complete</span>
         </div>
-        <script>
-            // Load tasks when the page loads
-            document.addEventListener('DOMContentLoaded', loadTasks);
+
+        <!-- Task List -->
+        <ul id="taskList"></ul>
+
+        <a href="remarks.html">Go to Progress Tracker</a>
+    </div>
+
+    <script>
+                    document.addEventListener('DOMContentLoaded', () => {
+                loadTasks();
+                checkDeadlines(); // Check deadlines immediately
+            });
 
             // Function to add a task
             function addTask() {
@@ -46,11 +56,13 @@
                 const taskWorkload = document.getElementById('taskWorkload').value;
                 const taskType = document.getElementById('taskType').value;
 
+                // Validate inputs
                 if (!taskName || !taskDeadline || !taskWorkload || !taskType) {
                     alert('Please fill in all fields!');
                     return;
                 }
 
+                // Create a task object
                 const task = {
                     id: Date.now(), // Unique ID
                     name: taskName,
@@ -60,16 +72,26 @@
                     completed: false, // Default to incomplete
                 };
 
+                // Save the task to localStorage
                 saveTaskToLocalStorage(task);
-                loadTasks(); // Reload tasks to update the UI
+
+                // Reload tasks to update the UI
+                loadTasks();
+
+                // Clear input fields
                 clearInputs();
             }
 
             // Function to save task to localStorage
             function saveTaskToLocalStorage(task) {
-                let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
-                tasks.push(task);
-                localStorage.setItem('tasks', JSON.stringify(tasks));
+                try {
+                    let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+                    tasks.push(task);
+                    localStorage.setItem('tasks', JSON.stringify(tasks));
+                } catch (error) {
+                    console.error('Failed to save task to localStorage:', error);
+                    alert('Failed to save task. Please try again.');
+                }
             }
 
             // Function to load tasks from localStorage
@@ -77,6 +99,17 @@
                 let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
                 tasks = prioritizeTasks(tasks); // Prioritize tasks
                 renderTasks(tasks); // Render tasks in the UI
+
+                // Calculate progress
+                const totalTasks = tasks.length;
+                const completedTasks = tasks.filter(task => task.completed).length;
+                const progress = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
+
+                // Update progress bar
+                const progressBar = document.getElementById('progressBar');
+                const progressText = document.getElementById('progressText');
+                progressBar.value = progress;
+                progressText.textContent = `${Math.round(progress)}% Complete`;
             }
 
             // Function to prioritize tasks
@@ -84,7 +117,12 @@
                 return tasks.sort((a, b) => {
                     const urgencyA = new Date(a.deadline).getTime();
                     const urgencyB = new Date(b.deadline).getTime();
-                    return urgencyA - urgencyB;
+
+                    if (urgencyA !== urgencyB) {
+                        return urgencyA - urgencyB; // Sooner deadlines first
+                    } else {
+                        return b.workload - a.workload; // Higher workload first if deadlines are the same
+                    }
                 });
             }
 
@@ -103,19 +141,22 @@
                         <span>Type: ${task.type}</span>
                         <span>Deadline: ${new Date(task.deadline).toLocaleString()}</span>
                         <span>Difficulty: ${getWorkloadText(task.workload)}</span>
-                        <button class="marker" onclick="markTaskAsDone(${task.id})">Mark as Done</button>
+                        <button class="marker" onclick="toggleTaskCompletion(${task.id})">
+                            ${task.completed ? 'Undo' : 'Mark as Done'}
+                        </button>
+                        <button onclick="removeTask(this)">Delete</button>
                     `;
 
                     taskList.appendChild(taskItem);
                 });
             }
 
-            // Function to mark a task as done
-            function markTaskAsDone(taskId) {
+            // Function to toggle task completion
+            function toggleTaskCompletion(taskId) {
                 let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
                 tasks = tasks.map(task => {
-                    if (task.id === taskId) {
-                        task.completed = true; // Mark task as completed
+                    if (task.id === Number(taskId)) {
+                        task.completed = !task.completed; // Toggle completion status
                     }
                     return task;
                 });
@@ -123,12 +164,24 @@
                 loadTasks(); // Reload tasks to update the UI
             }
 
-            // Function to clear input fields
-            function clearInputs() {
-                document.getElementById('taskName').value = '';
-                document.getElementById('taskDeadline').value = '';
-                document.getElementById('taskWorkload').value = '1';
-                document.getElementById('taskType').value = 'essay';
+            // Function to remove a task
+            function removeTask(button) {
+                if (!confirm('Are you sure you want to delete this task?')) {
+                    return;
+                }
+
+                const taskItem = button.parentElement;
+                const taskId = taskItem.dataset.taskId;
+
+                removeTaskFromLocalStorage(taskId);
+                loadTasks(); // Reload tasks after deletion
+            }
+
+            // Function to remove task from localStorage
+            function removeTaskFromLocalStorage(taskId) {
+                let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+                tasks = tasks.filter(task => task.id !== Number(taskId));
+                localStorage.setItem('tasks', JSON.stringify(tasks));
             }
 
             // Function to get workload text
@@ -144,6 +197,50 @@
                         return 'Unknown';
                 }
             }
+
+            // Function to clear input fields
+            function clearInputs() {
+                document.getElementById('taskName').value = '';
+                document.getElementById('taskDeadline').value = '';
+                document.getElementById('taskWorkload').value = '1';
+                document.getElementById('taskType').value = 'essay';
+            }
+
+            
+            // Function to play the alert sound
+                function playAlertSound() {
+                    const audio = new Audio('notif.mp3'); // Path to your audio file
+                    audio.play()
+                        .then(() => {
+                            console.log('Alert sound played successfully.');
+                        })
+                        .catch(error => {
+                            console.error('Failed to play alert sound:', error);
+                        });
+                }
+
+                // Function to check deadlines and trigger alarms
+                function checkDeadlines() {
+                    const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+
+                    tasks.forEach(task => {
+                        const deadline = new Date(task.deadline).getTime(); // Deadline in milliseconds
+                        const now = new Date().getTime(); // Current time in milliseconds
+                        const timeDifference = deadline - now; // Time left in milliseconds
+
+                        // Convert time difference to minutes
+                        const minutesLeft = Math.floor(timeDifference / (1000 * 60));
+
+                        // Trigger alarm if the deadline is within 1 hour (60 minutes)
+                        if (minutesLeft > 0 && minutesLeft <= 60) {
+                            playAlertSound(); // Play the alert sound
+                            alert(`Deadline approaching for task: "${task.name}" (${minutesLeft} minutes left)`);
+                        }
+                    });
+                }
+
+                // Check deadlines every minute (60,000 milliseconds)
+                setInterval(checkDeadlines, 60000);
         </script>
     </body>
-    </html>
+</html>
