@@ -1,4 +1,5 @@
 // script.js
+
 const pomodoroBtn = document.getElementById('pomodoro-btn');
 const shortBreakBtn = document.getElementById('short-break-btn');
 const longBreakBtn = document.getElementById('long-break-btn');
@@ -6,6 +7,7 @@ const timeDisplay = document.getElementById('time');
 const startBtn = document.getElementById('start-btn');
 const pauseBtn = document.getElementById('pause-btn');
 const resetBtn = document.getElementById('reset-btn');
+const popupSound = document.getElementById('popup-sound');
 
 let timer;
 let timeLeft = 25 * 60; // 25 minutes in seconds
@@ -66,6 +68,8 @@ function startTimer() {
             } else {
                 clearInterval(timer);
                 isRunning = false;
+                // Play the sound when the timer ends
+                popupSound.play();
                 alert(`${currentMode === 'pomodoro' ? 'Time for a break!' : 'Time to work!'}`);
                 switchMode();
             }
@@ -112,3 +116,4 @@ resetBtn.addEventListener('click', resetTimer);
 
 // Initialize
 loadState();
+
