@@ -1,4 +1,3 @@
-// script.js
 
 const pomodoroBtn = document.getElementById('pomodoro-btn');
 const shortBreakBtn = document.getElementById('short-break-btn');
@@ -68,9 +67,8 @@ function startTimer() {
             } else {
                 clearInterval(timer);
                 isRunning = false;
-                // Play the sound when the timer ends
+                
                 popupSound.play();
-                alert(`${currentMode === 'pomodoro' ? 'Time for a break!' : 'Time to work!'}`);
                 switchMode();
             }
         }, 1000);

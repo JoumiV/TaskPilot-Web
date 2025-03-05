@@ -232,7 +232,7 @@
                         const minutesLeft = Math.floor(timeDifference / (1000 * 60));
 
                         // Trigger alarm if the deadline is within 1 hour (60 minutes)
-                        if (minutesLeft > 0 && minutesLeft <= 60) {
+                        if (minutesLeft > 0 && minutesLeft <= 2880) {
                             playAlertSound(); // Play the alert sound
                             alert(`Deadline approaching for task: "${task.name}" (${minutesLeft} minutes left)`);
                         }
@@ -240,7 +240,7 @@
                 }
 
                 // Check deadlines every minute (60,000 milliseconds)
-                setInterval(checkDeadlines, 60000);
+                setInterval(checkDeadlines, 2880000);
         </script>
     </body>
 </html>
